@@ -49,11 +49,10 @@ requirements:
 test:
   imports:
     - neuralforecast
-  ## Skipping pip-check (as build keeps failing)
-  # commands:
-  #   - pip check
-  # requires:
-  #   - pip
+  commands:
+    - pip check
+  requires:
+    - pip
 
 about:
   home: https://github.com/Nixtla/neuralforecast/tree/main/
