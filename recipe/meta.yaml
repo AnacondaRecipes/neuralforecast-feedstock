@@ -10,14 +10,16 @@ source:
   sha256: c1084144a1c8009ac92ef5d1b9f9c2efa7c130685b080212dee0516153692dbf
 
 build:
-  number: 1
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip: true  # [py<36]
 
 requirements:
   host:
     - pip
-    - python >=3.7
+    - python
+    - setuptools
+    - wheel
   run:
     - python >=3.7
     - fastcore
