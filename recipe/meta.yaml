@@ -8,6 +8,8 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/neuralforecast-{{ version }}.tar.gz
   sha256: c1084144a1c8009ac92ef5d1b9f9c2efa7c130685b080212dee0516153692dbf
+  patches:
+    - patches/001_relax_reqs.patch
 
 build:
   number: 0
@@ -16,6 +18,9 @@ build:
   skip: true  # [py<36 or (not win) or (not linux-64)]
 
 requirements:
+  build:
+    - patch  # [not win]
+    - m2-patch  # [win]
   host:
     - pip
     - python
