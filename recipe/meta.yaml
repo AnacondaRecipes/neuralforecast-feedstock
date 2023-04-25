@@ -14,8 +14,9 @@ source:
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  # ray-tune is only available on win64 and linux-64
-  skip: true  # [py<36 or (not win) or (not linux64)]
+  # ray-tune is only available on win64 and linux-64 for py<311
+  skip: true  # [py<36 or py>310]
+  skip: true  # [((not linux64) and (not win64))]
 
 requirements:
   build:
