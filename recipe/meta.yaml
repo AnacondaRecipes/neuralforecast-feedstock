@@ -12,7 +12,8 @@ source:
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  skip: true  # [py<36]
+  # ray-tune is only available on win64 and linux-64
+  skip: true  # [py<36 or (not win) or (not linux-64)]
 
 requirements:
   host:
@@ -26,7 +27,7 @@ requirements:
     - pandas >=1.3.5
     - pytorch >=1.12.1
     - pytorch-lightning 1.9.3
-    # - ray-tune 2.3.0
+    - ray-tune 2.3.0
 
 test:
   imports:
