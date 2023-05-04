@@ -8,55 +8,46 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/neuralforecast-{{ version }}.tar.gz
   sha256: c1084144a1c8009ac92ef5d1b9f9c2efa7c130685b080212dee0516153692dbf
+  patches:
+    - patches/001_relax_reqs.patch
 
 build:
-  number: 1
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  # ray-tune is only available for py<311 and is missing on s390x, ppc64le and aarch64
+  skip: true  # [py<36 or py>310]
+  skip: true  # [(linux and (s390x or ppc64le or aarch64))]
 
 requirements:
+  build:
+    - patch  # [not win]
+    - m2-patch  # [win]
   host:
     - pip
-    - python >=3.7
+    - python
+    - setuptools
+    - wheel
   run:
-    - python >=3.7
-    - fastcore
-    - gdown
-    - hyperopt
-    - matplotlib-base
-    - numba
-    - openpyxl
-    - pandas
-    - pip
-    - py7zr >=0.18.1
-    - pytorch-lightning >=1.3.0
-    - requests
-    - scikit-learn
-    - statsmodels
-    - pytorch >=1.4
-    - torchinfo
-    - tqdm
-    - xlrd
-    # The following is necessary to pass pip-check
-    # pyDeprecate==0.3.1 is necessary for PL==1.5.10
-    - pyDeprecate 0.3.1
-    # pyppmd and zipfile-deflate constraints are necessary for py7zr
-    - pyppmd >=0.17.0,<0.18.0
-    - zipfile-deflate64 >=0.2.0
+    - python
+    - numpy
+    - pandas >=1.3.5
+    - pytorch >=1.12.1
+    - pytorch-lightning 1.9.3
+    - ray-tune 2.3.0
 
 test:
   imports:
     - neuralforecast
-  ## Skipping pip-check (as build keeps failing)
-  # commands:
-  #   - pip check
-  # requires:
-  #   - pip
+  commands:
+    - pip check
+  requires:
+    - pip
 
 about:
   home: https://github.com/Nixtla/neuralforecast/tree/main/
   summary: Deep Learning for Time Series Forecasting
-  license: GPL-3.0-only
+  license: Apache-2.0
+  license_family: Apache
   license_file: LICENSE
   description: |
     State-of-the-art time series forecasting for PyTorch.
