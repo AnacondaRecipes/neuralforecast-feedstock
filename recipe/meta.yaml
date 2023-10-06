@@ -11,7 +11,9 @@ source:
 
 build:
   number: 0
-  # ray-tune is missing on s390x, ppc64le
+  # ray-core/ray-tune 2.3.0 haven't Python 3.11 support at the moment.
+  skip: true  # [py<38 or py>310]
+  # ray-core/ray-tune are missing on s390x, ppc64le
   skip: true  # [(linux and (s390x or ppc64le))]
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
