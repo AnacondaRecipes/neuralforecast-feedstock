@@ -51,6 +51,8 @@ test:
   requires:
     - pip
     - pytest
+    - git
+    - polars
 
 about:
   home: https://github.com/Nixtla/neuralforecast/tree/main/
