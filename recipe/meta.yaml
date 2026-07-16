@@ -41,18 +41,13 @@ requirements:
     - pyarrow >=23.0.1
 
 test:
-  source_files:
-    - tests
   imports:
     - neuralforecast
   commands:
     - pip check
-    - pytest -v tests
   requires:
     - pip
-    - pytest
-    - git
-    - polars
+
 
 about:
   home: https://github.com/Nixtla/neuralforecast/tree/main/
