@@ -1,5 +1,5 @@
 {% set name = "neuralforecast" %}
-{% set version = "3.2.0" %}
+{% set version = "3.2.2" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: eea25c7f4a885b56d2f2a96b1aebaa425da730f25b5176783018c5f62fc11b13
+  sha256: 0f98002aa48728dfc54768da3791531e184d01c9e1af037a2172b763d152edd1
 
 build:
   number: 0
@@ -19,8 +19,9 @@ requirements:
   host:
     - pip
     - python
-    - setuptools >=61.0
+    - setuptools >=83.0.0
     - wheel
+    - pytorch {{ pytorch }}
   run:
     - python
     - coreforecast >=0.0.6
@@ -36,6 +37,7 @@ requirements:
     - ray-tune >=2.2.0
     - optuna
     - utilsforecast >=0.2.3
+    - ray >=2.2.0
   run_constrained:
     # spark
     - pyspark >=3.5
@@ -49,7 +51,6 @@ test:
   requires:
     - pip
 
-
 about:
   home: https://github.com/Nixtla/neuralforecast/tree/main/
   summary: Deep Learning for Time Series Forecasting
@@ -59,9 +60,9 @@ about:
   description: |
     State-of-the-art time series forecasting for PyTorch.
 
-    `NeuralForecast` is a Python library for time series forecasting with 
-    deep learning models. It includes *benchmark datasets*, *data-loading 
-    utilities*, *evaluation functions*, statistical *tests*, univariate *model 
+    `NeuralForecast` is a Python library for time series forecasting with
+    deep learning models. It includes *benchmark datasets*, *data-loading
+    utilities*, *evaluation functions*, statistical *tests*, univariate *model
     benchmarks* and *SOTA* models implemented in PyTorch and PyTorchLightning.
 
     PyPI: [https://pypi.org/project/neuralforecast/](https://pypi.org/project/neuralforecast/)
