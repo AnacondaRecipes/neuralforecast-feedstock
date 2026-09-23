@@ -1,25 +1,26 @@
 {% set name = "neuralforecast" %}
-{% set version = "3.2.0" %}
+{% set version = "3.2.2" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: eea25c7f4a885b56d2f2a96b1aebaa425da730f25b5176783018c5f62fc11b13
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 0f98002aa48728dfc54768da3791531e184d01c9e1af037a2172b763d152edd1
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   # No ray-tune for py314
-  skip: true  # [py<310 or py>313]
+  skip: true  # [py<310  or py>313]
 
+# Upstream source - https://github.com/Nixtla/neuralforecast/blob/v3.2.2/pyproject.toml
 requirements:
   host:
     - pip
     - python
-    - setuptools >=61.0
+    - setuptools >=83.0.0
     - wheel
   run:
     - python
@@ -41,13 +42,23 @@ requirements:
     - pyspark >=3.5
     - pyarrow >=23.0.1
 
+# tests require polars, but polars existing in main conflicting with utilsforecast
+# utilsforecast >=0.2.3 requires polars <=1.31 which conflicts with any installable versions previously reported
+{% set ignored_tests = " --ignore=tests/test_core.py" %}
+{% set ignored_tests = ignored_tests + " --ignore=tests/test_distributed.py" %}
+{% set ignored_tests = ignored_tests + " --ignore=tests/test_tsdataset.py" %}
+
 test:
+  source_files:
+    - tests
   imports:
     - neuralforecast
   commands:
     - pip check
+    - pytest -vv tests {{ ignored_tests }}
   requires:
     - pip
+    - pytest
 
 
 about:
@@ -65,7 +76,6 @@ about:
     benchmarks* and *SOTA* models implemented in PyTorch and PyTorchLightning.
 
     PyPI: [https://pypi.org/project/neuralforecast/](https://pypi.org/project/neuralforecast/)
-
   doc_url: https://nixtla.github.io/neuralforecast
   dev_url: https://github.com/Nixtla/neuralforecast
 
@@ -74,3 +84,5 @@ extra:
     - sugatoray
     - cchallu
     - FedericoGarza
+  skip-lints:
+    - cbc_dep_in_run_missing_from_host
