@@ -1,5 +1,5 @@
 {% set name = "neuralforecast" %}
-{% set version = "3.2.0" %}
+{% set version = "3.2.2" %}
 
 package:
   name: {{ name }}
@@ -7,19 +7,20 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: eea25c7f4a885b56d2f2a96b1aebaa425da730f25b5176783018c5f62fc11b13
+  sha256: 0f98002aa48728dfc54768da3791531e184d01c9e1af037a2172b763d152edd1
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   # No ray-tune for py314
-  skip: true  # [py<310 or py>313]
+  skip: true  # [py<310  or py>313]
 
+# Upstream source - https://github.com/Nixtla/neuralforecast/blob/v3.2.2/pyproject.toml
 requirements:
   host:
     - pip
     - python
-    - setuptools >=61.0
+    - setuptools >=83.0.0
     - wheel
   run:
     - python
@@ -74,3 +75,5 @@ extra:
     - sugatoray
     - cchallu
     - FedericoGarza
+  skip-lints:
+    - cbc_dep_in_run_missing_from_host
