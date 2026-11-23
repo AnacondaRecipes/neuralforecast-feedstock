@@ -1,44 +1,46 @@
 {% set name = "neuralforecast" %}
-{% set version = "3.2.2" %}
+{% set version = "3.3.1" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 0f98002aa48728dfc54768da3791531e184d01c9e1af037a2172b763d152edd1
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: e8eab28dc61b1dacfefa1813a287e3119123f4b1c58f0224eb6351575fb4022d
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  # No ray-tune for py314
-  skip: true  # [py<310  or py>313]
+  # upstream requires-python >=3.11; classifiers cover 3.11-3.14
+  skip: true  # [py<311 or py>314]
 
-# Upstream source - https://github.com/Nixtla/neuralforecast/blob/v3.2.2/pyproject.toml
+# Upstream source - https://github.com/Nixtla/neuralforecast/blob/v3.3.1/pyproject.toml
 requirements:
   host:
     - pip
     - python
-    - setuptools >=83.0.0
+    - setuptools >=84.0.0
     - wheel
   run:
     - python
-    - coreforecast >=0.0.6
+    - coreforecast >=0.0.17
     - fsspec
-    - numpy >=1.21.6
-    - pandas >=1.3.5
+    - numpy >=1.23.2
+    - pandas >=2.3.3
     - scipy
     - pytorch >=2.9.1
     - tornado >=6.5.5
-    - pytorch-lightning >=2.0.0,<2.6.0
-    # ray[train,tune]>=2.2.0
-    - ray-train >=2.2.0
-    - ray-tune >=2.2.0
+    - pytorch-lightning >=2.6.6
+    - safetensors >=0.8.0
+    # ray[train,tune]>=2.58.0
+    - ray-train >=2.58.0
+    - ray-tune >=2.58.0
     - optuna
     - utilsforecast >=0.2.3
   run_constrained:
     # spark
+    - fugue
     - pyspark >=3.5
     - pyarrow >=23.0.1
 
@@ -48,6 +50,29 @@ requirements:
 {% set ignored_tests = ignored_tests + " --ignore=tests/test_distributed.py" %}
 {% set ignored_tests = ignored_tests + " --ignore=tests/test_tsdataset.py" %}
 
+# these tests read fixtures from tests/backward_comp/data/{NLinear,DeepAR,TSMixer};
+# upstream MANIFEST.in only packages neuralforecast/, so the sdist ships tests/test_*.py
+# but none of tests/backward_comp/, and they fail with FileNotFoundError
+{% set deselected_tests = " --deselect=tests/test_migrate.py::test_migrated_directory_loads_without_pickle" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_migration_preserves_predictions" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_migration_recovers_a_loss_from_an_unpickled_object" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_source_is_left_untouched" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_default_destination_is_a_sibling" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_explicit_destination" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_refuses_a_destination_that_resolves_onto_the_source" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_already_migrated_directory_is_a_no_op" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_existing_destination_needs_overwrite" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_cli_migrates_and_reports" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_cli_quiet" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_a_single_checkpoint_can_be_migrated" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_migrate.py::test_a_checkpoint_whose_name_hides_the_model_needs_it_named" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_core_serialization.py::test_v1_directory_loads_with_explicit_consent" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_core_serialization.py::test_v1_dataset_pkl_is_refused_outright" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_core_serialization.py::test_v1_dataset_pkl_is_refused_before_pickle_runs" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_malicious_artifacts.py::test_a_malicious_sidecar_is_refused_by_default" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_malicious_artifacts.py::test_a_malicious_dataset_is_refused_before_anything_is_read" %}
+{% set deselected_tests = deselected_tests + " --deselect=tests/test_malicious_artifacts.py::test_pickle_load_is_never_reached_by_default" %}
+
 test:
   source_files:
     - tests
@@ -55,14 +80,15 @@ test:
     - neuralforecast
   commands:
     - pip check
-    - pytest -vv tests {{ ignored_tests }}
+    - pytest -vv tests {{ ignored_tests }}{{ deselected_tests }}
   requires:
     - pip
     - pytest
+    - pytest-cov
 
 
 about:
-  home: https://github.com/Nixtla/neuralforecast/tree/main/
+  home: https://github.com/Nixtla/neuralforecast/tree/main
   summary: Deep Learning for Time Series Forecasting
   license: Apache-2.0
   license_family: Apache
@@ -76,7 +102,7 @@ about:
     benchmarks* and *SOTA* models implemented in PyTorch and PyTorchLightning.
 
     PyPI: [https://pypi.org/project/neuralforecast/](https://pypi.org/project/neuralforecast/)
-  doc_url: https://nixtla.github.io/neuralforecast
+  doc_url: https://nixtlaverse.nixtla.io/neuralforecast
   dev_url: https://github.com/Nixtla/neuralforecast
 
 extra:
